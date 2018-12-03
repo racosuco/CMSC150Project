@@ -3,6 +3,7 @@ library(shinydashboard)
 
 source("UI/PolyReg.r")
 source("UI/QSI.r")
+source("UI/Simplex.r")
 
 ui <- dashboardPage(
   dashboardHeader(title = "CMSC 150 Project"),
@@ -16,7 +17,8 @@ ui <- dashboardPage(
   dashboardBody(
     tabItems(
       PolyReg(),
-      QSI()
+      QSI(),
+      Simplex()
     )
   )
 )
