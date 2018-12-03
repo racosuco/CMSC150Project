@@ -1,7 +1,7 @@
 library(shiny)
 library(shinydashboard)
 
-QSI = function(){
+Simplex = function(){
   tabItem(tabName = "spx",
           titlePanel("Simplex")
   )
