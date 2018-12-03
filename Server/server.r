@@ -5,7 +5,7 @@ source("Server/script/QSI.r")
 
 server <- function(input, output) {
   output$PolyReg <- renderTable({
-    req(input$prfile, input$prdegree)
+    req(input$prfile, input$prdegree, input$prestimate)
     tryCatch(
       {
         listOfXY = read.csv(input$prfile$datapath, header = FALSE, sep = ",")
@@ -19,6 +19,11 @@ server <- function(input, output) {
     PRList = PolynomialRegression(input$prdegree, listOfXY)
     output$funcString = renderText({
       return(PRList$polynomial_string)
+    })
+    output$funcEstimate = renderText({
+      ans = PRList$polynomial_function(input$prestimate)
+      retString = paste("f(", input$prestimate, "): ", ans, sep = "")
+      return(retString)
     })
     return(listOfXY)
   })
