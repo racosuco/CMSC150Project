@@ -98,5 +98,6 @@ QSI <- function(listOfXY){
   resultantList = GaussJordanFunction(resultantMatrix)
   polStringList = GetFuncList(resultantList) 
   polFuncList = ConvertToFunctions(polStringList)
-  return(polFuncList)
+  retList = list(polFuncList = polFuncList, polStringList = polStringList)
+  return(retList)
 }
