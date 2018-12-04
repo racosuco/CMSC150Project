@@ -52,7 +52,7 @@ server <- function(input, output) {
     output$qsiEstimate = renderText({
       index = 0
       for(i in 1:(length(x)-1)){
-        if(input$qsiestimate > x[i] && input$qsiestimate < x[i+1]){
+        if(input$qsiestimate >= x[i] && input$qsiestimate <= x[i+1]){
           index = i
         }
       }
