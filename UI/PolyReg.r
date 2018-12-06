@@ -13,7 +13,7 @@ PolyReg = function(){
                       "text/comma-separated-values,text/plain",
                       ".csv")
           ),
-          numericInput("prdegree", "Degree", 2, min = 2),
+          numericInput("prdegree", "Degree", 1, min = 1),
           numericInput("prestimate", "Value of x", 1, min = 1)
         ),
         mainPanel(

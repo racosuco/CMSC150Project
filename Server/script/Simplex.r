@@ -1,6 +1,3 @@
-#eqs = c(7, 11, 1, 0, 0, 0, 0, 77, 10, 8, 0, 1, 0, 0, 0, 80, 1, 0, 0, 0, 1, 0, 0, 9, 0, 1, 0, 0, 0, 1, 0, 6, -150, -175, 0, 0, 0, 0, 1, 0)
-#exMatrix = matrix(eqs, nrow = 5, ncol = 8, byrow = T)
-
 checkCondition <- function(x){
   if(length(x[x<0]) > 0){
     return(TRUE)

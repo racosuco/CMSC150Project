@@ -45,6 +45,10 @@ PolynomialRegression <- function(degree, listOfXY){
   x = listOfXY[[1]]
   y = listOfXY[[2]]
 
+  if(length(x) < degree){
+    return(NA)
+  }
+  
   vectorOfMatrix = getVectorMatrix(x, y, degree) #Get the vector for the matrix
   actualMatrix = matrix(vectorOfMatrix, degree+1, degree+2, byrow = TRUE)
   retList = list(augcoeffmatrix=actualMatrix) #List that contains the necessary elements needed
