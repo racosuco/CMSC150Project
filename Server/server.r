@@ -39,7 +39,7 @@ server <- function(input, output) {
         stop(safeError(e))
       }
     )
-    
+    listOfXY = listOfXY[order(listOfXY[[1]]),]
     QSIList = QSI(listOfXY)
     x = c(listOfXY[[1]])
     output$funcStringList = renderPrint({
