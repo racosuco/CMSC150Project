@@ -18,7 +18,7 @@ shippingCost[3,] = c(3, 4, 5, 5, 9, 280)
 colnames(shippingCost) <- c("W1 Cost", "W2 Cost", "W3 Cost", "W4 Cost", "W5 Cost", "Supply")
 rownames(shippingCost) <- c(plants, "ShipCost")
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   output$PolyReg <- renderTable({
     req(input$prfile, input$prdegree, input$prestimate)
     tryCatch(
@@ -88,7 +88,7 @@ server <- function(input, output) {
     return(listOfXY)
   })
   
-  values = reactiveValues(compute = compute, shippingCost = shippingCost)
+  values = reactiveValues(compute = compute, shippingCost = shippingCost, tables = c())
   
   observe({
     if(!is.null(input$compute)){
@@ -132,7 +132,18 @@ server <- function(input, output) {
     values$shippingCost["ShipCost", "W4 Cost"] = values$shippingCost[1:3, "W4 Cost"] %*% values$compute[1:3, "W4"]
     values$shippingCost["ShipCost", "W5 Cost"] = values$shippingCost[1:3, "W5 Cost"] %*% values$compute[1:3, "W5"]
     values$shippingCost["ShipCost", "Supply"] = sum(values$shippingCost["ShipCost", 1:5])
+    values$tables = listOfAnswer$matrixIterations
+    
+    updateSelectInput(session, "tableau", label = "Select Iteration", choices = c("Hide", c(1:length(listOfAnswer$matrixIterations))))
+
     rhandsontable(values$shippingCost) %>%
     hot_row(c(4), readOnly = TRUE)
+  })
+  
+  output$tables = renderPrint({
+    if(input$tableau != "Hide"){
+      return(values$tables[[as.integer(input$tableau)]])
+    }
+    return(NA)
   })
 }
