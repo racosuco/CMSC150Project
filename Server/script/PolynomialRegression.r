@@ -38,16 +38,12 @@ getVectorMatrix <- function(x, y, degree){
   return (vectorOfMatrix)
 }
 PolynomialRegression <- function(degree, listOfXY){
-  if(degree < 1 || length(listOfXY[[1]]) != length(listOfXY[[2]])){ #Return NA if degree is less than 1 or the length of 2 vectors is not equal
+  if(degree < 1 || length(listOfXY[[1]]) != length(listOfXY[[2]]) || length(listOfXY[[1]]) <= degree){ #Return NA if degree is less than 1 or the length of 2 vectors is not equal
     return (NA)
   }
 
   x = listOfXY[[1]]
   y = listOfXY[[2]]
-
-  if(length(x) < degree){
-    return(NA)
-  }
   
   vectorOfMatrix = getVectorMatrix(x, y, degree) #Get the vector for the matrix
   actualMatrix = matrix(vectorOfMatrix, degree+1, degree+2, byrow = TRUE)

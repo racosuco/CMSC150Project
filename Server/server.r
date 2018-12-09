@@ -6,18 +6,17 @@ source("Server/script/QSI.r")
 source("Server/script/Simplex.r")
 
 plants = c("Denver", "Phoenix", "Dallas")
-DF <- as.data.frame(matrix(0, ncol = 7, nrow = 5))
-DF[,1] = c(plants, "Total", "Demand")
-DF[5,] = c("Demand", 180, 80, 200, 160, 220, "")
-colnames(DF) <- c("Plants","W1", "W2", "W3", "W4", "W5", "Total")
+compute <- as.data.frame(matrix(0, ncol = 6, nrow = 5), stringsAsFactors = FALSE)
+compute[5,] = c(180, 80, 200, 160, 220, 0)
+colnames(compute) <- c("W1", "W2", "W3", "W4", "W5", "Total")
+rownames(compute) <- c(plants, "Total", "Demand")
 
-DF2 <- as.data.frame(matrix(0, ncol = 7, nrow = 4))
-DF2[1,] = c(0, 10, 8, 6, 5, 4, 310)
-DF2[2,] = c(0, 6, 5, 4, 3, 6, 260)
-DF2[3,] = c(0, 3, 4, 4, 5, 9, 280)
-DF2[,1] = c(plants, "Shipping")
-colnames(DF2) <- c("Plants", "W1 Cost", "W2 Cost", "W3 Cost", "W4 Cost", "W5 Cost", "Supply")
-DF2[4,7] = ""
+shippingCost <- as.data.frame(matrix(0, ncol = 6, nrow = 4), stringsAsFactors = FALSE)
+shippingCost[1,] = c(10, 8, 6, 5, 4, 310)
+shippingCost[2,] = c(6, 5, 4, 3, 6, 260)
+shippingCost[3,] = c(3, 4, 5, 5, 9, 280)
+colnames(shippingCost) <- c("W1 Cost", "W2 Cost", "W3 Cost", "W4 Cost", "W5 Cost", "Supply")
+rownames(shippingCost) <- c(plants, "ShipCost")
 
 server <- function(input, output) {
   output$PolyReg <- renderTable({
@@ -89,15 +88,51 @@ server <- function(input, output) {
     return(listOfXY)
   })
   
-  output$Simplex <- renderRHandsontable({
-    rhandsontable(DF, width = 550, height = 300) %>%
-      hot_col(c(1, 7), readOnly = TRUE) %>%
-      hot_row(c(4), readOnly = TRUE) %>%
-      hot_cell(6, "Total", readOnly = TRUE)
+  values = reactiveValues(compute = compute, shippingCost = shippingCost)
+  
+  observe({
+    if(!is.null(input$compute)){
+      values$compute = hot_to_r(input$compute)
+    }
   })
   
-  output$Simplex2 <- renderRHandsontable({
-    rhandsontable(DF2, width = 550, height = 300) %>%
-    hot_col(c(1:6), readOnly = TRUE) 
+  observe({
+    if(!is.null(input$shippingCost)){
+      values$shippingCost = hot_to_r(input$shippingCost)
+    }
+  })
+  
+  output$compute = renderRHandsontable({
+      values$compute[1, "Total"] = sum(values$compute[1,1:5])
+      values$compute[2, "Total"] = sum(values$compute[2,1:5])
+      values$compute[3, "Total"] = sum(values$compute[3,1:5])
+      values$compute["Total", "W1"] = sum(values$compute[1:3, "W1"])
+      values$compute["Total", "W2"] = sum(values$compute[1:3, "W2"])
+      values$compute["Total", "W3"] = sum(values$compute[1:3, "W3"])
+      values$compute["Total", "W4"] = sum(values$compute[1:3, "W4"])
+      values$compute["Total", "W5"] = sum(values$compute[1:3, "W5"])
+      values$compute["Total","Total"] = sum(values$compute[1:3, "Total"])
+      rhandsontable(values$compute) %>%
+      hot_row(c(1:4), readOnly = TRUE) %>%
+      hot_col(c(6), readOnly = TRUE)
+  })
+  
+  output$shippingCost = renderRHandsontable({
+    vecOfVarM = t(as.matrix(values$shippingCost[1:3, 1:5]))
+    vecOfVar = as.numeric(as.vector(vecOfVarM))
+    vecOfSupply = as.numeric(unname(unlist(values$shippingCost[1:3,"Supply"])))
+    vecOfDemand = as.numeric(unname(unlist(values$compute["Demand",1:5])))
+    vecOfDemand = vecOfDemand * -1
+    listOfAnswer = initMatrix(vecOfVar, vecOfSupply, vecOfDemand)
+    tempMatrix = matrix(listOfAnswer$vectorValues, ncol = 5, nrow = 3, byrow = TRUE)
+    values$compute[1:3, 1:5] = as.vector(tempMatrix) 
+    values$shippingCost["ShipCost", "W1 Cost"] = values$shippingCost[1:3, "W1 Cost"] %*% values$compute[1:3, "W1"]
+    values$shippingCost["ShipCost", "W2 Cost"] = values$shippingCost[1:3, "W2 Cost"] %*% values$compute[1:3, "W2"]
+    values$shippingCost["ShipCost", "W3 Cost"] = values$shippingCost[1:3, "W3 Cost"] %*% values$compute[1:3, "W3"]
+    values$shippingCost["ShipCost", "W4 Cost"] = values$shippingCost[1:3, "W4 Cost"] %*% values$compute[1:3, "W4"]
+    values$shippingCost["ShipCost", "W5 Cost"] = values$shippingCost[1:3, "W5 Cost"] %*% values$compute[1:3, "W5"]
+    values$shippingCost["ShipCost", "Supply"] = sum(values$shippingCost["ShipCost", 1:5])
+    rhandsontable(values$shippingCost) %>%
+    hot_row(c(4), readOnly = TRUE)
   })
 }

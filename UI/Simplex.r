@@ -10,10 +10,10 @@ Simplex = function(){
               sidebarPanel = NULL,
               mainPanel = mainPanel(
                 fluidRow(
-                  column(1, rHandsontableOutput("Simplex"))
+                  rHandsontableOutput("compute")
                 ),
                 fluidRow(
-                  column(1, rHandsontableOutput("Simplex2"))
+                  rHandsontableOutput("shippingCost")
                 )
               )
             )
